@@ -24,9 +24,9 @@ namespace KenHaise.AspNetCore.Jwt.Extensions
         /// <param name="configureOptions">Action of type JwtBearerOptions</param>
         public static void AddJwtBearerWithTokenHandler<TUser>(this AuthenticationBuilder builder, Action<JwtBearerOptions> configureOptions) where TUser : IdentityUser
         {
-            builder.AddJwtBearer(configureOptions);
             var bearerOptions = new JwtBearerOptions();
             configureOptions(bearerOptions);
+            builder.AddJwtBearer(configureOptions);
             builder.Services.AddTokenHandler<TUser>(options =>
             {
                 options.SecretKey = bearerOptions.TokenValidationParameters.IssuerSigningKey;
@@ -42,13 +42,13 @@ namespace KenHaise.AspNetCore.Jwt.Extensions
         /// <param name="configureOptions">Action of type JwtBearerOptions</param>
         public static void AddJwtBearerWithTokenHandler<TUser>(this AuthenticationBuilder builder, string authenticationScheme, Action<JwtBearerOptions> configureOptions) where TUser : IdentityUser
         {
-            builder.AddJwtBearer(authenticationScheme, configureOptions);
             var bearerOptions = new JwtBearerOptions();
             configureOptions(bearerOptions);
+            builder.AddJwtBearer(authenticationScheme, configureOptions);
             builder.Services.AddTokenHandler<TUser>(options =>
             {
                 options.SecretKey = bearerOptions.TokenValidationParameters.IssuerSigningKey;
-                options.Audience = bearerOptions.TokenValidationParameters.ValidIssuer;
+                options.Issuer = bearerOptions.TokenValidationParameters.ValidIssuer;
                 options.Audience = bearerOptions.TokenValidationParameters.ValidAudience;
             });
         }

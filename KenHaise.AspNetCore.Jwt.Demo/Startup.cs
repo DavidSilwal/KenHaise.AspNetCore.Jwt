@@ -48,7 +48,7 @@ namespace KenHaise.AspNetCore.Jwt.Demo
             .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddAuthentication()
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearerWithTokenHandler<IdentityUser>(JwtBearerDefaults.AuthenticationScheme, jwtOptions =>
                 {
                     jwtOptions.TokenValidationParameters = new TokenValidationParameters

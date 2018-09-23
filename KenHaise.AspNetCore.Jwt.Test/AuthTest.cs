@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -13,7 +14,6 @@ namespace KenHaise.AspNetCore.Jwt.Test
     public class AuthTest : IClassFixture<ApplicationFactory<Startup>>
     {
         private readonly HttpClient client;
-
         public AuthTest(ApplicationFactory<Startup> factory)
         {
             client = factory.CreateClient();
@@ -52,6 +52,11 @@ namespace KenHaise.AspNetCore.Jwt.Test
             Assert.NotNull(obj);
             Assert.Equal("TestUser", obj.UserName);
             Assert.NotNull(obj.Token);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", obj.Token);
+            var AuthCheck = await client.GetAsync("Api/Account/GetUser");
+
+            Assert.Equal(HttpStatusCode.OK, AuthCheck.StatusCode);
+            
         }
         class LoginResult
         {

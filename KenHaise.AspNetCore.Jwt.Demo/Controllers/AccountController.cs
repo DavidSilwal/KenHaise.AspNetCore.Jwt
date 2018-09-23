@@ -33,7 +33,7 @@ namespace KenHaise.AspNetCore.Jwt.Demo.Controllers
         public async Task<IActionResult> GetUser()
         {
             var user = await _userManager.GetUserAsync(User);
-            return Ok($"You are logged in {user.ToString()}");
+            return Ok($"You are logged in {user.UserName}");
         }
         [HttpPost("[action]")]
         public async Task<IActionResult> SignIn([FromBody] LoginModel model)
@@ -51,7 +51,7 @@ namespace KenHaise.AspNetCore.Jwt.Demo.Controllers
                 var token = await _tokenHandler.GenerateTokenForUser(user, claims =>
                 {
                     claims.Add(new Claim(ClaimTypes.Email, user.Email));
-                },expiry: DateTime.Now.AddMinutes(20));
+                },expiry: DateTime.Now.AddDays(20));
                 return Ok(new { token, user.UserName });
             }
             ModelState.AddModelError("password", $"Invalid password");
