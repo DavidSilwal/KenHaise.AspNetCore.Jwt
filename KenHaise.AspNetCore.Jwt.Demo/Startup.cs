@@ -36,7 +36,7 @@ namespace KenHaise.AspNetCore.Jwt.Demo
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddIdentity<IdentityUser,IdentityRole>(options =>
+            services.AddDefaultIdentity<IdentityUser>(options =>
             {
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 5;

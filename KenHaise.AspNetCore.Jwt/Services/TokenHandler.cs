@@ -23,25 +23,7 @@ namespace KenHaise.AspNetCore.Jwt.Services
         public async Task<string> GenerateTokenForUser(TUser user, DateTime? expiry = null)
         {
             var expiryTime = expiry ?? DateTime.Now.AddDays(2);
-            List<Claim> jwtClaims = new List<Claim>()
-            {
-                new Claim(JwtRegisteredClaimNames.Sub,user.Id),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToTimeStamp().ToString(),ClaimValueTypes.Integer64),
-                new Claim(JwtRegisteredClaimNames.Exp, expiryTime.ToTimeStamp().ToString(),ClaimValueTypes.Integer64),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name,user.UserName)
-            };
-
-            //Add user roles
-            var roles = await userManager.GetRolesAsync(user);
-
-            foreach (var role in roles)
-            {
-                jwtClaims.Add(new Claim(ClaimTypes.Role, role));
-            }
-
-
+            var jwtClaims = await GetDefaultClaimsForUser(user, expiryTime);
             var creds = new SigningCredentials(JwtSetting.SecretKey, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(JwtSetting.Issuer,
@@ -55,6 +37,21 @@ namespace KenHaise.AspNetCore.Jwt.Services
         public async Task<string> GenerateTokenForUser(TUser user, Action<List<Claim>> claims, DateTime? expiry = null)
         {
             var expiryTime = expiry ?? DateTime.Now.AddDays(2);
+            var jwtClaims = new List<Claim>();
+            claims(jwtClaims);
+            jwtClaims.AddRange(await GetDefaultClaimsForUser(user, expiryTime));
+            var creds = new SigningCredentials(JwtSetting.SecretKey, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(JwtSetting.Issuer,
+                JwtSetting.Audience,
+                jwtClaims,
+                expires: expiryTime,
+                signingCredentials: creds);
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private async Task<List<Claim>> GetDefaultClaimsForUser(TUser user, DateTime expiryTime)
+        {
             List<Claim> jwtClaims = new List<Claim>()
             {
                 new Claim(JwtRegisteredClaimNames.Sub,user.Id),
@@ -64,21 +61,16 @@ namespace KenHaise.AspNetCore.Jwt.Services
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Name,user.UserName)
             };
-            claims(jwtClaims);
-            var roles = await userManager.GetRolesAsync(user);
-
-            foreach (var role in roles)
+            if (userManager.SupportsUserRole)
             {
-                jwtClaims.Add(new Claim(ClaimTypes.Role, role));
-            }
-            var creds = new SigningCredentials(JwtSetting.SecretKey, SecurityAlgorithms.HmacSha256);
+                var roles = await userManager.GetRolesAsync(user);
 
-            var token = new JwtSecurityToken(JwtSetting.Issuer,
-                JwtSetting.Audience,
-                jwtClaims,
-                expires: expiryTime,
-                signingCredentials: creds);
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                foreach (var role in roles)
+                {
+                    jwtClaims.Add(new Claim(ClaimTypes.Role, role));
+                }
+            }
+            return jwtClaims;
         }
     }
 }
