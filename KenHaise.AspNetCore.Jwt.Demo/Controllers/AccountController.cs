@@ -19,10 +19,10 @@ namespace KenHaise.AspNetCore.Jwt.Demo.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly ITokenHandler _tokenHandler;
+        private readonly ITokenHandler<IdentityUser> _tokenHandler;
         public AccountController(UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
-            ITokenHandler tokenHandler)
+            ITokenHandler<IdentityUser> tokenHandler)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -48,7 +48,7 @@ namespace KenHaise.AspNetCore.Jwt.Demo.Controllers
             var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
             if (result.Succeeded)
             {
-                var token = _tokenHandler.GenerateTokenForUser(user, claims =>
+                var token = await _tokenHandler.GenerateTokenForUser(user, claims =>
                 {
                     claims.Add(new Claim(ClaimTypes.Email, user.Email));
                 },expiry: DateTime.Now.AddMinutes(20));

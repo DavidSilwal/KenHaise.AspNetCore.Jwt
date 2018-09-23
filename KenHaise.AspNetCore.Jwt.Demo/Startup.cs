@@ -36,7 +36,7 @@ namespace KenHaise.AspNetCore.Jwt.Demo
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>(options =>
+            services.AddIdentity<IdentityUser,IdentityRole>(options =>
             {
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 5;
@@ -45,10 +45,11 @@ namespace KenHaise.AspNetCore.Jwt.Demo
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
             })
+            .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddAuthentication()
-                .AddJwtBearerWithTokenHandler(JwtBearerDefaults.AuthenticationScheme, jwtOptions =>
+                .AddJwtBearerWithTokenHandler<IdentityUser>(JwtBearerDefaults.AuthenticationScheme, jwtOptions =>
                 {
                     jwtOptions.TokenValidationParameters = new TokenValidationParameters
                     {

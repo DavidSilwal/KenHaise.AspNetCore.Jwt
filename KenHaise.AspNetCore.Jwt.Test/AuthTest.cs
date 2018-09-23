@@ -48,6 +48,7 @@ namespace KenHaise.AspNetCore.Jwt.Test
             var loginResult = await client.PostAsJsonAsync("Api/Account/Signin", loginModel);
             Assert.Equal(HttpStatusCode.OK, loginResult.StatusCode);
             var obj = await loginResult.Content.ReadAsAsync<LoginResult>();
+            Console.WriteLine(loginResult.StatusCode);
             Assert.NotNull(obj);
             Assert.Equal("TestUser", obj.UserName);
             Assert.NotNull(obj.Token);

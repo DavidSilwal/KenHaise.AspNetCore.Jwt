@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KenHaise.AspNetCore.Jwt", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KenHaise.AspNetCore.Jwt.Demo", "KenHaise.AspNetCore.Jwt.Demo\KenHaise.AspNetCore.Jwt.Demo.csproj", "{20FA4711-1DA0-479C-8130-F20D04FE57B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KenHaise.AspNetCore.Jwt.Test", "KenHaise.AspNetCore.Jwt.Test\KenHaise.AspNetCore.Jwt.Test.csproj", "{B7F72873-F12C-4109-BC5D-B1A23E66551C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KenHaise.AspNetCore.Jwt.Test", "KenHaise.AspNetCore.Jwt.Test\KenHaise.AspNetCore.Jwt.Test.csproj", "{B7F72873-F12C-4109-BC5D-B1A23E66551C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
