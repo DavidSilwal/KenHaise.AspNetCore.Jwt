@@ -48,7 +48,6 @@ namespace KenHaise.AspNetCore.Jwt.Test
             var loginResult = await client.PostAsJsonAsync("Api/Account/Signin", loginModel);
             Assert.Equal(HttpStatusCode.OK, loginResult.StatusCode);
             var obj = await loginResult.Content.ReadAsAsync<LoginResult>();
-            Console.WriteLine(loginResult.StatusCode);
             Assert.NotNull(obj);
             Assert.Equal("TestUser", obj.UserName);
             Assert.NotNull(obj.Token);
@@ -56,12 +55,31 @@ namespace KenHaise.AspNetCore.Jwt.Test
             var AuthCheck = await client.GetAsync("Api/Account/GetUser");
 
             Assert.Equal(HttpStatusCode.OK, AuthCheck.StatusCode);
-            
+
+            var refreshTokenResult = await client.GetAsync("Api/Account/RefreshToken");
+            Assert.Equal(HttpStatusCode.OK, refreshTokenResult.StatusCode);
+            var refreshTokenResponse = await refreshTokenResult.Content.ReadAsAsync<NewTokenResult>();
+            Assert.NotEqual(obj.Token, refreshTokenResponse.Token);
+
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", refreshTokenResponse.Token);
+            var ReAuthCheck = await client.GetAsync("Api/Account/GetUser");
+            Assert.Equal(HttpStatusCode.OK, ReAuthCheck.StatusCode);
+        }
+        [Fact]
+        public async Task BadTokenRefresh()
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "This is a bad token");
+            var refreshTokenResult = await client.GetAsync("Api/Account/RefreshToken");
+            Assert.Equal(HttpStatusCode.Unauthorized, refreshTokenResult.StatusCode);
         }
         class LoginResult
         {
             public string Token { get; set; }
             public string UserName { get; set; }
+        }
+        class NewTokenResult
+        {
+            public string Token { get; set; }
         }
 
     }

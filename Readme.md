@@ -139,7 +139,34 @@ public async Task<IActionResult> Register([FromBody] RegisterModel model)
 
 Test the api by signing up and then logging in using POSTMAN.
 
+## Refreshing a Token
 
+Create an action method to allow refreshing an existing token.  Using the same ITokenHandler, you can use authorization header to generate new token or pass token string. 
 
+### Using Token String
 
+```C#
+            //passing token string
+			if (Request.Headers.TryGetValue("Authorization", out StringValues authorizationToken))
+            {
+                var token = authorizationToken.ToString().Split("Bearer ")[1];
+                var newToken = await _tokenHandler.RefreshTokenAsync(token, DateTime.Now.AddDays(2));
+                return Ok(new
+                {
+                    token = newToken
+                });
+            }
+            return Unauthorized();
+```
 
+### Using Authorization Header
+
+```C#
+var newToken = await _tokenHandler.RefreshTokenAsync(Request.Headers["Authorization"], DateTime.Now.AddDays(2));
+            return Ok(new
+            {
+                token = newToken
+            });
+```
+
+The service takes care of separating token string from the header.  

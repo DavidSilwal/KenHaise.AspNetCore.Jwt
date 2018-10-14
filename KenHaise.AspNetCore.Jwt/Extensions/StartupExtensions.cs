@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,11 +12,9 @@ namespace KenHaise.AspNetCore.Jwt.Extensions
 {
     public static class StartupExtensions
     {
-        private static void AddTokenHandler<TUser>(this IServiceCollection services, Action<JwtSetting> options) where TUser: IdentityUser
+        private static void AddTokenHandler<TUser>(this IServiceCollection services, TokenValidationParameters tokenValidationParameters) where TUser: IdentityUser
         {
-            var model = new JwtSetting();
-            options(model);
-            services.AddScoped<ITokenHandler<TUser>, TokenHandler<TUser>>(serviceProvider => new TokenHandler<TUser>(model, serviceProvider.GetRequiredService<UserManager<TUser>>()));
+            services.AddScoped<ITokenHandler<TUser>, TokenHandler<TUser>>(serviceProvider => new TokenHandler<TUser>(tokenValidationParameters, serviceProvider.GetRequiredService<UserManager<TUser>>()));
         }
         /// <summary>
         /// Adds a scoped service of TokenHandler using the factory specified in implementationFactory to the specified Microsoft.Extensions.DependencyInjection.IServiceCollection.
@@ -27,12 +26,7 @@ namespace KenHaise.AspNetCore.Jwt.Extensions
             var bearerOptions = new JwtBearerOptions();
             configureOptions(bearerOptions);
             builder.AddJwtBearer(configureOptions);
-            builder.Services.AddTokenHandler<TUser>(options =>
-            {
-                options.SecretKey = bearerOptions.TokenValidationParameters.IssuerSigningKey;
-                options.Audience = bearerOptions.TokenValidationParameters.ValidIssuer;
-                options.Audience = bearerOptions.TokenValidationParameters.ValidAudience;
-            });
+            builder.Services.AddTokenHandler<TUser>(bearerOptions.TokenValidationParameters);
         }
         /// <summary>
         /// Adds a scoped service of TokenHandler using the factory specified in implementationFactory to the specified Microsoft.Extensions.DependencyInjection.IServiceCollection with custom authentication scheme.
@@ -45,12 +39,7 @@ namespace KenHaise.AspNetCore.Jwt.Extensions
             var bearerOptions = new JwtBearerOptions();
             configureOptions(bearerOptions);
             builder.AddJwtBearer(authenticationScheme, configureOptions);
-            builder.Services.AddTokenHandler<TUser>(options =>
-            {
-                options.SecretKey = bearerOptions.TokenValidationParameters.IssuerSigningKey;
-                options.Issuer = bearerOptions.TokenValidationParameters.ValidIssuer;
-                options.Audience = bearerOptions.TokenValidationParameters.ValidAudience;
-            });
+            builder.Services.AddTokenHandler<TUser>(bearerOptions.TokenValidationParameters);
         }
     }
 }

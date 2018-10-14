@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 
 namespace KenHaise.AspNetCore.Jwt.Demo.Controllers
 {
@@ -35,6 +36,19 @@ namespace KenHaise.AspNetCore.Jwt.Demo.Controllers
             var user = await _userManager.GetUserAsync(User);
             return Ok($"You are logged in {user.UserName}");
         }
+
+
+        [HttpGet("[action]")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> RefreshToken()
+        {
+            var newToken = await _tokenHandler.RefreshTokenAsync(Request.Headers["Authorization"], DateTime.Now.AddDays(2));
+            return Ok(new
+            {
+                token = newToken
+            });
+        }
+
         [HttpPost("[action]")]
         public async Task<IActionResult> SignIn([FromBody] LoginModel model)
         {
@@ -48,10 +62,7 @@ namespace KenHaise.AspNetCore.Jwt.Demo.Controllers
             var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
             if (result.Succeeded)
             {
-                var token = await _tokenHandler.GenerateTokenForUser(user, claims =>
-                {
-                    claims.Add(new Claim(ClaimTypes.Email, user.Email));
-                },expiry: DateTime.Now.AddDays(20));
+                var token = await _tokenHandler.GenerateTokenForUser(user,expiry: DateTime.Now.AddDays(20));
                 return Ok(new { token, user.UserName });
             }
             ModelState.AddModelError("password", $"Invalid password");
@@ -76,6 +87,7 @@ namespace KenHaise.AspNetCore.Jwt.Demo.Controllers
             ModelState.AddModelError("username", $"Username {model.UserName} is taken");
             return BadRequest(ModelState);
         }
+
 
     }
 }

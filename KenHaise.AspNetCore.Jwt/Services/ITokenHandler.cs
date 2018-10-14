@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -26,5 +27,26 @@ namespace KenHaise.AspNetCore.Jwt.Services
         /// <param name="expiry">Expiry time for token, default is 2 days</param>
         /// <returns>String of token</returns>
         Task<string> GenerateTokenForUser(TUser user, Action<List<Claim>> claims, DateTime? expiry = null);
+
+        /// <summary>
+        /// Generates new token with old token.The new token has all claims of previous token as well as new roles.
+        /// </summary>
+        /// <param name="token">Old token</param>
+        /// <param name="expiry">expiry for new token</param>
+        /// <returns>Task for new Token</returns>
+        Task<string> RefreshTokenAsync(string token, DateTime? expiry = null);
+
+        /// <summary>
+        /// Generates new token with old token.The new token has all claims of previous token as well as new roles.
+        /// </summary>
+        /// <param name="token">Old token</param>
+        /// <param name="expiry">expiry for new token</param>
+        /// <returns>Task for new Token</returns>
+        Task<string> RefreshTokenAsync(string token, Action<List<Claim>> claims, DateTime? expiry = null);
+
+
+        Task<string> RefreshTokenAsync(StringValues authorizationHeader, DateTime? expiry = null);
+        Task<string> RefreshTokenAsync(StringValues authorizationHeader, Action<List<Claim>> claims, DateTime? expiry = null);
+
     }
 }
